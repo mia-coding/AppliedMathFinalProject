@@ -1,0 +1,307 @@
+<!doctype html>
+
+<html lang="en">
+
+<head>
+
+<meta charset="utf-8"/>
+
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+
+<title>Dating Signaling — Cute Stacked Demo</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+
+</head>
+
+<body>
+
+  <div class="wrap">
+
+
+
+    <header class="card" style="text-align:center">
+
+      <h1>Dating Simulation - Signalr</h1>
+
+      <p>A is you, B can be chosen or randomized and reacts based on similarity, use the sliders to match preferences, and buttons to simulate</p>
+
+    </header>
+
+
+
+    <!-- PROFILES -->
+
+    <section class="card">
+
+      <div class="profiles" aria-hidden="false">
+
+        <div class="profile" id="profileA">
+
+          <div class="avatar" id="avatarA">A</div>
+
+          <div class="meta">
+
+            <h3 id="nameAview">Your Name, <span id="ageAview">18</span></h3>
+
+            <p id="bioA">You (A) — decide to signal or not</p>
+
+            <div class="tags" id="tagsA"></div>
+
+          </div>
+
+        </div>
+
+
+
+        <div class="profile" id="profileB">
+
+          <div class="avatar" id="avatarB">B</div>
+
+          <div class="meta">
+
+            <h3 id="nameBview">B, <span id="ageBview">20</span></h3>
+
+            <p id="bioB">Other (B) — reacts to similarity</p>
+
+            <div class="tags" id="tagsB"></div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+
+      <div class="actions">
+
+        <button class="btn" id="btnSignal">Signal 💌</button>
+
+        <button class="btn ghost" id="btnNo">Signal No 🙅</button>
+
+      </div>
+
+    </section>
+
+
+
+    <!-- CONTROLS -->
+
+    <section class="card">
+
+      <div style="display:grid; gap:10px">
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px">
+
+          <div>
+
+            <label style="font-weight:800;color:#6b213f">Name A</label>
+
+            <input id="inputNameA" type="text" value="Your Name" style="width:100%;padding:8px;border-radius:8px;border:1px solid var(--soft-border)"/>
+
+          </div>
+
+          <div>
+
+            <label style="font-weight:800;color:#6b213f">Age A</label>
+
+            <input id="inputAgeA" type="number" min="16" max="70" value="18" style="width:100%;padding:8px;border-radius:8px;border:1px solid var(--soft-border)"/>
+
+          </div>
+
+        </div>
+
+
+
+        <div>
+
+          <label style="font-weight:800;color:#6b213f">Hobbies A (click to toggle)</label>
+
+          <div id="hobbiesA" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px"></div>
+
+        </div>
+
+
+
+        <div style="height:6px"></div>
+
+
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px">
+
+          <div>
+
+            <label style="font-weight:800;color:#6b213f">Name B</label>
+
+            <input id="inputNameB" type="text" value="B" style="width:100%;padding:8px;border-radius:8px;border:1px solid var(--soft-border)"/>
+
+          </div>
+
+          <div>
+
+            <label style="font-weight:800;color:#6b213f">Age B</label>
+
+            <input id="inputAgeB" type="number" min="16" max="70" value="19" style="width:100%;padding:8px;border-radius:8px;border:1px solid var(--soft-border)"/>
+
+          </div>
+
+        </div>
+
+
+
+        <div>
+
+          <label style="font-weight:800;color:#6b213f">Hobbies B (click to toggle)</label>
+
+          <div id="hobbiesB" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px"></div>
+
+        </div>
+
+
+
+        <div style="height:8px"></div>
+
+
+
+        <!-- pretty sliders -->
+
+        <div class="controls">
+
+          <div class="control-row">
+
+            <label>Weight of shared hobbies</label>
+
+            <div class="slider"><input id="wH" type="range" min="-0.4" max="0.4" step="0.01" value="0"><div class="val" id="wHval">0</div></div>
+
+          </div>
+
+          <div class="control-row">
+
+            <label>Age penalty (per year)</label>
+
+            <div class="slider"><input id="wA" type="range" min="-0.06" max="0.06" step="0.001" value="0"><div class="val" id="wAval">0</div></div>
+
+          </div>
+
+          <div class="control-row">
+
+            <label>A's sim p (for sims)</label>
+
+            <div class="slider"><input id="pSlider" type="range" min="0" max="1" step="0.01" value="0.5"><div class="val" id="pVal">0.50</div></div>
+
+          </div>
+
+        </div>
+
+
+
+        <div style="display:flex;gap:8px;margin-top:10px">
+
+          <button class="btn" id="btnCompute">Compute & Recommend</button>
+
+          <button class="btn ghost" id="btnRandom">Randomize B</button>
+
+          <button class="btn ghost" id="btnReset">Reset</button>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+
+    <!-- MATRIX + CHART + SUMMARY -->
+
+    <section class="card">
+
+      <div style="display:flex;justify-content:space-between;align-items:center">
+
+        <div style="font-weight:800;color:#6b213f">Payoff Matrix (A, B)</div>
+
+        <div id="neBadge" style="display:none"></div>
+
+      </div>
+
+
+
+      <div class="matrix" id="matrixArea">
+
+        <div class="cell" id="cellSS"><div class="label">A: Signal — (<span id="ssA">3</span>, <span id="ssB">3</span>)</div><div class="sub">both signal</div></div>
+
+        <div class="cell" id="cellSN"><div class="label">A: Signal — (<span id="snA">-2</span>, <span id="snB">0</span>)</div><div class="sub">A yes, B no</div></div>
+
+        <div class="cell" id="cellNS"><div class="label">A: Not — (<span id="nsA">-1</span>, <span id="nsB">-1</span>)</div><div class="sub">A no, B yes</div></div>
+
+        <div class="cell" id="cellNN"><div class="label">A: Not — (<span id="nnA">0</span>, <span id="nnB">0</span>)</div><div class="sub">both signal no</div></div>
+
+      </div>
+
+
+
+      <div class="chart" id="chartArea">
+
+        <div class="bar" id="barSS" style="height:8%"><span id="pctSS">SS</span></div>
+
+        <div class="bar" id="barSN" style="height:8%"><span id="pctSN">SN</span></div>
+
+        <div class="bar" id="barNS" style="height:8%"><span id="pctNS">NS</span></div>
+
+        <div class="bar" id="barNN" style="height:8%"><span id="pctNN">NN</span></div>
+
+      </div>
+
+
+
+      <div class="summary">
+
+        <div>
+
+          <div style="font-size:13px;color:var(--muted)">Recommendation</div>
+
+          <div class="recommend" id="recommend">—</div>
+
+        </div>
+
+        <div style="text-align:right">
+
+          <div style="font-size:13px;color:var(--muted)">Expected payoffs (A)</div>
+
+          <div class="exp" id="expA">S: — · N: —</div>
+
+        </div>
+
+      </div>
+
+
+
+      <div style="margin-top:12px">
+
+        <div style="display:flex;gap:12px;align-items:center">
+
+          <button class="btn" id="btnSim">Run Simulation (1000)</button>
+
+          <div style="font-size:13px;color:var(--muted)">B's q = <span id="qVal">—</span></div>
+
+        </div>
+
+        <div style="margin-top:8px;font-size:13px;color:var(--muted)">Last result:</div>
+
+        <div id="simResult" style="font-weight:800;margin-top:6px">No sim yet</div>
+
+      </div>
+
+    </section>
+
+
+
+    <footer style="text-align:center;color:var(--muted);font-size:13px;margin-top:8px">
+
+      Tip: tweak hobbies & ages — the payoffs, q, and recommendation update live.
+
+    </footer>
+
+  </div>
+</body>
+</html>
